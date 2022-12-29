@@ -5,41 +5,52 @@ import static org.lwjgl.opengl.GL30.*;
 
 public class Mesh {
 
-    private int VAO, VBO; //vertex array object //vertex buffer object
+    private int VAO, VBO, IBO, TBO;
+    private int count;
 
-    private int vertexCount;
+    public Mesh(float[] vertices, byte[] indices, float[] textureCoordinates){
+        count = indices.length;
 
-    public Mesh(){
-
-   }
-
-   public boolean create(float vertices[]){
-        //Gen Vertex
         VAO = glGenVertexArrays();
         glBindVertexArray(VAO);
-        //Gen Buffers
+
         VBO = glGenBuffers();
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW /*Sends data on to VRAM */);
-        glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
+        glBufferData(GL_ARRAY_BUFFER, AfterBufferUtils.createFloatBuffer(vertices), GL_STATIC_DRAW);
+        glVertexAttribPointer(Shader.VERTEX_ATTRIB, 3 /*X,Y,Z*/, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(Shader.VERTEX_ATTRIB);
 
+        TBO = glGenBuffers();
+        glBindBuffer(GL_ARRAY_BUFFER, TBO);
+        glBufferData(GL_ARRAY_BUFFER, AfterBufferUtils.createFloatBuffer(textureCoordinates), GL_STATIC_DRAW);
+        glVertexAttribPointer(Shader.TCOORD_ATTRIB, 2/*X, Y*/, GL_FLOAT, false, 0, 0);
+        glEnableVertexAttribArray(Shader.TCOORD_ATTRIB);
+
+        IBO = glGenBuffers();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, AfterBufferUtils.createByteBuffer(indices), GL_STATIC_DRAW);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
+    }
 
-        vertexCount = vertices.length / 3;
-        return true;
-   }
-
-   public void destroy(){
-        glDeleteBuffers(VBO);
-        glDeleteVertexArrays(VAO);
-   }
-
-   public void draw(){
+    public void bind(){
         glBindVertexArray(VAO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IBO);
+    }
 
-        glEnableVertexAttribArray(0);
-        glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-        glDisableVertexAttribArray(0);
+    public void unbind(){
         glBindVertexArray(0);
-   }
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    }
+
+    public void draw(){
+        glDrawElements(GL_TRIANGLES, count, GL_UNSIGNED_BYTE, 0);
+    }
+
+    public void render(){
+        bind();
+        draw();
+    }
 }

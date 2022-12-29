@@ -1,0 +1,2 @@
+Fixed source reader returning null
+Fixed fragment shader location from shader + .vs to shader + .fs

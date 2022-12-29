@@ -1,1 +1,4 @@
-Initialize OpenGl in GLFW window ( glviewport not working rn )
+-organize program
+-make rendering class
+-Fix drawing map
+-fix and optimize player draw ( add x pos, y pos, turning... )

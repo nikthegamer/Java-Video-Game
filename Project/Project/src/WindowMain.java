@@ -1,158 +1,139 @@
-import org.lwjgl.*;
-import org.lwjgl.glfw.*;
-import org.lwjgl.opengl.*;
-import org.lwjgl.system.*;
+import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWVidMode;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.system.MemoryStack;
 
-import java.nio.*;
 import java.lang.*;
+import java.nio.IntBuffer;
 
-import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryStack.*;
+import static org.lwjgl.system.MemoryStack.stackPush;
 import static org.lwjgl.system.MemoryUtil.*;
-public class WindowMain {
+public class WindowMain implements Runnable{
 
     // The window handle
     private long window;
-    private float PlayerX = 11.5f*2/1024-1.0f;
-    private float PlayerY = 11.5f*2/1024-1.0f;
-    private int winWidth = 1024;
-    private int winHeight = 512;
+    private final int width = 1024;
+    private final int height = 512;
+    private Thread thread;
+    private boolean running = true;
+    private MapMain map;
+    public Controls Input;
 
-
-    public void RunWindow() {
-        System.out.println("Hello LWJGL " + Version.getVersion() + "!");
-
-        init();
-        loop();
-
-        glfwFreeCallbacks(window);
-        glfwDestroyWindow(window);
-
-
-        glfwTerminate();
-        glfwSetErrorCallback(null).free();
+    public void start(){
+        running = true;
+        thread = new Thread(this, "Game");
+        thread.start();
     }
 
-    private void init() {
-        GLFWErrorCallback.createPrint(System.err).set();
+    private void init(){
+        if(!glfwInit()){
+            return;
+        }
 
-        if ( !glfwInit() )
-            throw new IllegalStateException("Unable to initialize GLFW");
-
-        glfwDefaultWindowHints();
-        glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+        Input = new Controls();
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-        glfwWindowHint(GLFW_MAXIMIZED, GLFW_TRUE);
+        window = glfwCreateWindow(width, height,"Game | RayCaster", NULL, NULL);
 
-        //Draw / Color the window and the player
+        if (window == NULL){
+            return;
+        }
 
-        window = glfwCreateWindow(winWidth, winHeight, "Game | RayCaster", NULL, NULL);
-        if ( window == NULL )
-            throw new RuntimeException("Failed to create the GLFW window");
-
-        //Key press handler
-
-        glfwSetKeyCallback(window, (window, key, scancode, action, mods) ->
-        {
-            if ( key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
-                glfwSetWindowShouldClose(window, true);
-        });
 
         try ( MemoryStack stack = stackPush() ) {
-            IntBuffer pWidth = stack.mallocInt(1);
-            IntBuffer pHeight = stack.mallocInt(1);
+            IntBuffer pWidth = stack.mallocInt(1); // int*
+            IntBuffer pHeight = stack.mallocInt(1); // int*
 
+            // Get the window size passed to glfwCreateWindow
             glfwGetWindowSize(window, pWidth, pHeight);
 
+            // Get the resolution of the primary monitor
             GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
-            glfwSetWindowPos
-                    (
-                    window,
-                    (vidmode.width() - pWidth.get(0)) / 2,
-                    (vidmode.height() - pHeight.get(0)) / 2
+            // Center the window
+            glfwSetWindowPos(window, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2
             );
         }
 
-        glfwSetWindowSize(window, winWidth,winHeight);
         glfwMakeContextCurrent(window);
-        glfwSwapInterval(1);
+        glfwSetKeyCallback(window, Input.getKeyboardCallback());
         glfwShowWindow(window);
-    }
 
-    private void loop()
-    {
         GL.createCapabilities();
-        glClear(GL_COLOR_BUFFER_BIT);
 
-        glViewport(0, 0, winWidth, winHeight);
-        glClearColor(0.3f, 0.3f, 0.3f, 0.0f);
+        glClearColor(0.3f,0.3f,0.3f, 1);
+        glEnable(GL_DEPTH_TEST);
+        System.out.println("OpenGL" + glGetString(GL_VERSION));
+        Shader.loadAll();
 
-        PlayerMain playerPosDraw = new PlayerMain();
-        playerPosDraw.setPlayerX(PlayerX);
-        playerPosDraw.setPlayerY(PlayerY);
+        //---Projection Matrix---
+        //left, right == x axis; bottom; top == y axis; near, far == z axis;
+        //Matrix4f pr_matrix = Matrix4f.orthographic(-10.0f, 10.0f, -10.0f * 9.0f / 16.0f, 10.0f * 9.0f  /16.0f, -1.0f, 1.0f);
+        Matrix4f pr_matrix = Matrix4f.orthographic(-width, width, -height, height, -1.0f, 1.0f); //width is 1024 height is 512
+        Shader.BG.setUniformMat4f("pr_matrix", pr_matrix);
+        Shader.Player.setUniformMat4f("pr_matrix", pr_matrix);
 
-        MapMain MM = new MapMain();
-
-        Mesh testMesh = new Mesh();
-        testMesh.create(new float[]{
-                -1,-1,0,
-                0,1,0,
-                1,-1,0
-        });
-
-        Shader shader = new Shader();
-        shader.create("basic");
-        shader.useShader();
-
-        while ( !glfwWindowShouldClose(window) )
-        {
-
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-            MM.drawMap2D();
-            playerPosDraw.drawPlayer();
-
-            testMesh.draw();
-
-            glfwSetKeyCallback(window, (window, key, scancode, action, mods) ->
-            {
-                if ( key ==  GLFW_KEY_A && action == GLFW_REPEAT)
-                    playerPosDraw.setPlayerX(playerPosDraw.getPlayerX()-0.01f);
-                if ( key ==  GLFW_KEY_A && action == GLFW_PRESS)
-                    playerPosDraw.setPlayerX(playerPosDraw.getPlayerX()-0.01f);
-
-                if ( key ==  GLFW_KEY_D && action == GLFW_PRESS)
-                    playerPosDraw.setPlayerX(playerPosDraw.getPlayerX()+0.01f);
-                if ( key ==  GLFW_KEY_D && action == GLFW_REPEAT)
-                    playerPosDraw.setPlayerX(playerPosDraw.getPlayerX()+0.01f);
-
-                if ( key ==  GLFW_KEY_W && action == GLFW_PRESS)
-                    playerPosDraw.setPlayerY(playerPosDraw.getPlayerY()+0.01f);
-                if ( key ==  GLFW_KEY_W && action == GLFW_REPEAT)
-                    playerPosDraw.setPlayerY(playerPosDraw.getPlayerY()+0.01f);
-
-                if ( key ==  GLFW_KEY_S && action == GLFW_PRESS)
-                    playerPosDraw.setPlayerY(playerPosDraw.getPlayerY()-0.01f);
-                if ( key ==  GLFW_KEY_S && action == GLFW_REPEAT)
-                    playerPosDraw.setPlayerY(playerPosDraw.getPlayerY()-0.01f);
-
-//                if ((key == GLFW_KEY_A && action == GLFW_PRESS) || (key == GLFW_KEY_W && action == GLFW_PRESS)){
-//                    playerPosDraw.setPlayerX(playerPosDraw.getPlayerX()-0.01f);
-//                    playerPosDraw.setPlayerY(playerPosDraw.getPlayerY()+0.01f);
-//                }
-//
-//                if ((key == GLFW_KEY_A && action == GLFW_REPEAT) || (key == GLFW_KEY_W && action == GLFW_REPEAT)){
-//                    playerPosDraw.setPlayerX(playerPosDraw.getPlayerX()-0.01f);
-//                    playerPosDraw.setPlayerY(playerPosDraw.getPlayerY()+0.01f);
-//                }
-            });
-            glfwSwapBuffers(window);
-            glfwPollEvents();
-        }
-        testMesh.destroy();
-        shader.destroy();
+        map = new MapMain();
     }
+    public void run(){
+        init();
+
+        //---FPS---
+        long lastTime = System.nanoTime();
+        double delta = 0.0;
+        double ns = 1000000000.0 / 60.0;
+        long timer = System.currentTimeMillis();
+        int updates = 0;
+        int frames = 0;
+
+        //---GL error detection---
+        int error = glGetError();
+        if (error != GL_NO_ERROR) {
+            System.out.println(error); //1282 == Invalid operation ( error )
+        }
+        while(running){
+            long now = System.nanoTime();
+            delta += ( now - lastTime) / ns;
+            lastTime = now;
+
+            if (delta >= 1.0){
+                update();
+                updates++;
+                delta--;
+            }
+            render();
+            frames++;
+
+            if (System.currentTimeMillis() - timer > 1000){
+                timer+=1000;
+                System.out.println(updates + "ups, " + frames + " fps");
+                updates = 0;
+                frames = 0;
+            }
+
+            if (Input.isKeyDown(GLFW.GLFW_KEY_ESCAPE)){
+                return;
+            }
+        }
+        destroy();
+    }
+
+    private void update(){
+        map.update();
+        glfwPollEvents();
+    }
+
+    public void destroy(){
+        Input.destroy();
+        glfwWindowShouldClose(window);
+        glfwDestroyWindow(window);
+        glfwTerminate();
+    }
+    private void render(){
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        map.render();
+        glfwSwapBuffers(window);
+    }
+
 }

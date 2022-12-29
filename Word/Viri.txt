@@ -4,3 +4,11 @@ https://www.glfw.org/docs/3.3/context_guide.html#context_glext_auto ( 10.10.2022
 https://www.glfw.org/docs/latest/window_guide.html#window_creation ( 10.10.2022 )
 https://www.mvndoc.com/c/org.lwjgl/lwjgl-glfw/org/lwjgl/glfw/package-summary.html ( 10.10.2022 )
 https://www.lwjgl.org/guide ( 10.10.2022 )
+https://www.youtube.com/watch?v=2ZbmO8K-x2s&list=PLaWuTOi9sDeomi2umQ7N8Lqs-GtE1H4-b&index=3 ( 18.12.2022 )
+https://learnopengl.com/Model-Loading/Mesh ( 18.12.2022 )
+https://www.youtube.com/watch?v=WvVog06bLEY ( 18.12.2022 )
+https://www.youtube.com/watch?v=JotbpAwN7ZI ( 25.12.2022 )
+https://www.youtube.com/watch?v=527bR2JHSR0&t=2357s ( 25.12.2022 ) !!
+https://github.com/JOML-CI/JOML/tree/main ( 25.12.2022 )
+https://www.youtube.com/watch?v=4aSSsefetOc&list=PLaWuTOi9sDeomi2umQ7N8Lqs-GtE1H4-b&index=10 ( 25.12.2022 )
+https://www.youtube.com/watch?v=VuYnjsDOx60 ( 29.12.2022 )
