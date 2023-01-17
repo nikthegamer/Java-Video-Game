@@ -7,31 +7,19 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Render {
     private float px,py,pdx,pdy,pa;
-    private double PI = Math.PI;
-    private double P2 = PI/2;
-    private double P3 = 3*PI/2;
-    private float DR = 0.0174533f; //1 degree in radians
-    private int fps = new WindowMain().getFrames();
 
-    public void setPdx(float pdx) {
+    public void setPlayer(float px, float py, float pdx, float pdy){
+        this.px = px;
+        this.py = py;
         this.pdx = pdx;
+        this.pdy = pdy;
     }
-
     public float getPa() {
         return pa;
     }
 
-    public void setPdy(float pdy) {
-        this.pdy = pdy;
-    }
-
-    public void setPx(float px) {
-        this.px = px;
-    }
-
-    public void setPy(float py) {
-        this.py = py;
-    }
+    private double PI = Math.PI, P2 = PI/2, P3 = 3*PI/2;
+    private float DR = 0.0174533f; //1 degree in radians
 
     public void game(){
         buttons();
@@ -42,23 +30,23 @@ public class Render {
     //---RENDER PLAYER---
 
     void drawPlayer(){
-        glColor3f(1,1,0);
-        glPointSize(8);
-        glBegin(GL_POINTS);
-        glVertex2f(px,py);
+        glColor3f(1,1,0); //Player color 0.0 - 1.0 float
+        glPointSize(8); //Size of player in rasterized points ( initial value of 1 )
+        glBegin(GL_POINTS); //Specifies the beginning of created verticies presented between glBegin and glEnd
+        glVertex2f(px,py); //GL_POINTS single point on the screen equal to player x and y position
         glEnd();
 
         //drawLineOfSight();
         drawRays3D();
     }
 
-    void drawLineOfSight(){
-        glLineWidth(3);
-        glBegin(GL_LINES);
-        glVertex2f(px,py);
-        glVertex2f(px+pdx*5,py+pdy*5);
-        glEnd();
-    }
+//    void drawLineOfSight(){
+//        glLineWidth(3);
+//        glBegin(GL_LINES);
+//        glVertex2f(px,py);
+//        glVertex2f(px+pdx*5,py+pdy*5);
+//        glEnd();
+//    }
 
     //---DRAW RAYS---
 
