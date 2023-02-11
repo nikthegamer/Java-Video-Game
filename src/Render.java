@@ -7,19 +7,21 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class Render {
     private float px,py,pdx,pdy,pa;
+    private double PI = Math.PI;
+    private double P2 = PI/2;
+    private double P3 = 3*PI/2;
+    private float DR = 0.0174533f; //1 degree in radians
 
-    public void setPlayer(float px, float py, float pdx, float pdy){
-        this.px = px;
-        this.py = py;
+    public void setData(float pdx, float pdy, float px, float py) {
         this.pdx = pdx;
         this.pdy = pdy;
+        this.px = px;
+        this.py = py;
     }
+
     public float getPa() {
         return pa;
     }
-
-    private double PI = Math.PI, P2 = PI/2, P3 = 3*PI/2;
-    private float DR = 0.0174533f; //1 degree in radians
 
     public void game(){
         buttons();
@@ -30,10 +32,10 @@ public class Render {
     //---RENDER PLAYER---
 
     void drawPlayer(){
-        glColor3f(1,1,0); //Player color 0.0 - 1.0 float
-        glPointSize(8); //Size of player in rasterized points ( initial value of 1 )
-        glBegin(GL_POINTS); //Specifies the beginning of created verticies presented between glBegin and glEnd
-        glVertex2f(px,py); //GL_POINTS single point on the screen equal to player x and y position
+        glColor3f(1,1,0);
+        glPointSize(8);
+        glBegin(GL_POINTS);
+        glVertex2f(px,py);
         glEnd();
 
         //drawLineOfSight();
@@ -49,9 +51,15 @@ public class Render {
 //    }
 
     //---DRAW RAYS---
+    Textures textures = new Textures();
+    int[] All_textures = textures.All_Textures;
 
-    private int r,mx,my,mp,dof; private float rx,ry,ra,xo,yo,disT;
+    private int r,mx,my,mp,dof; private float rx,ry,ra,xo,yo,disT,tx;
     void drawRays3D(){
+
+        glColor3f(0,1,1); glBegin(GL_QUADS); glVertex2i(526,  0); glVertex2i(1006,  0); glVertex2i(1006,160); glVertex2i(526,160); glEnd();
+        glColor3f(0,0,1); glBegin(GL_QUADS); glVertex2i(526,160); glVertex2i(1006,160); glVertex2i(1006,320); glVertex2i(526,320); glEnd();
+
         ra=pa-DR*30; if (ra<0){
             ra+=2*PI;
         } else if (ra>2*PI) {
@@ -150,21 +158,38 @@ public class Render {
 
             float ca=pa-ra; if (ca<0){ca+=2*PI;} if (ca>2*PI){ca-=2*PI;}
             disT= (float) (disT*Math.cos(ca)); //Fix fisheye
-
             float lineH=(mapS*320)/disT; if (lineH>320){lineH=320;} //Line height
             float lineO=160-lineH/2; //Line offset
 
-            glLineWidth(8);
-            glBegin(GL_LINES);
-            glVertex2f(r*8+530,    lineO);
-            glVertex2f(r*8+530, lineO+lineH);
-            glEnd();
+            float shade = 0.3f;
+            int y;
+            float ty=0;
+            float ty_step= 32.0f/lineH;
+
+            for (y=0;y<lineH;y++)
+            {
+                float c=All_textures[(int)(ty)*32+(int)(tx)];
+                if (c==1){tx=(int)(rx/2.0f)%32;} if (ra > 180) {tx=31-tx;}
+                else{tx=(int)(ry/2.0f)%32; if (ra>90 && ra<270){tx=31-tx;}}
+
+                if (disV<disH){
+                    glColor3f(c-shade,c-shade,c-shade);
+                }
+                if (disH<disV){
+                    glColor3f(c,c,c);
+                }
+                glPointSize(8);
+                glBegin(GL_POINTS);
+                glVertex2f(r*8+530,y+lineO);
+                glEnd();
+                ty+=ty_step;
+            }
 
             ra+=DR; if (ra<0){
-                ra+=2*PI;
-            } else if (ra>2*PI) {
-                ra-=2*PI;
-            }
+            ra+=2*PI;
+        } else if (ra>2*PI) {
+            ra-=2*PI;
+        }
         }
     }
     float dist(float ax, float ay, float bx, float by, float ang){
@@ -220,12 +245,12 @@ public class Render {
 
     int map[]={
             1,1,1,1,1,1,1,1,
-            1,0,0,0,0,0,0,1,
             1,0,0,0,0,1,0,1,
+            1,0,1,0,0,1,0,1,
             1,0,0,0,0,0,0,1,
+            1,1,0,1,0,0,0,1,
             1,0,0,0,0,0,0,1,
-            1,0,0,0,0,0,0,1,
-            1,0,0,0,0,0,0,1,
+            1,0,1,0,0,0,0,1,
             1,1,1,1,1,1,1,1
     };
 

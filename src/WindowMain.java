@@ -7,8 +7,8 @@ import static org.lwjgl.opengl.GL11.*;
 
 public class WindowMain {
 
-    private int width = 1024; //Window width
-    private int height = 512; //Window height
+    private int width = 1024;
+    private int height = 512;
 
     //-----FPS-----
     private long lastTime = System.nanoTime();
@@ -16,6 +16,9 @@ public class WindowMain {
     private double ns = 1000000000.0 / 60.0;
     private long timer = System.currentTimeMillis();
     private int frames = 0;
+    public int getFrames() {
+        return frames;
+    }
     public void run(){
         try{
             Display.setDisplayMode(new DisplayMode(width, height));
@@ -26,16 +29,15 @@ public class WindowMain {
         }
 
         //Initiaize code OpenGL
-        glClearColor(0.3f,0.3f,0.3f,1); //set background color
-        glMatrixMode(GL_PROJECTION); //sets current matrix mode to a projection matrix
+        glClearColor(0.3f,0.3f,0.3f,1);
+        glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        glOrtho(0, width, height,0,1.0f,-1.0f); //sets the orthographic projection
+        glOrtho(0, width, height,0,1.0f,-1.0f);
         glMatrixMode(GL_MODELVIEW);
 
-        //Set player position and delta
         Render render = new Render();
         float pa = render.getPa();
-        render.setPlayer(300,300,((float)Math.cos(pa)*5),((float)Math.sin(pa)*5));
+        render.setData(((float)Math.cos(pa)*5), ((float)Math.sin(pa)*5), 300, 300);
 
         //render loop
         while(!Display.isCloseRequested()){
@@ -52,6 +54,7 @@ public class WindowMain {
             render.game();
 
             frames++;
+
             //-----FPS-----
             if (System.currentTimeMillis() - timer > 1000){
                 timer+=1000;
@@ -59,7 +62,6 @@ public class WindowMain {
                 frames = 0;
             }
 
-            //Escape key closes the window
             if (Keyboard.isKeyDown(Keyboard.KEY_ESCAPE)){
                 Display.destroy();
                 System.exit(0);
@@ -67,7 +69,7 @@ public class WindowMain {
 
             Display.setResizable(false);
             Display.update();
-            Display.sync(60); //syncs to (int) fps
+            Display.sync(60);
         }
 
         Display.destroy();
