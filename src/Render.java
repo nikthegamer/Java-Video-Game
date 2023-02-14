@@ -54,13 +54,14 @@ public class Render {
     Textures textures = new Textures();
     int[] All_textures = textures.All_Textures;
 
-    private int r,mx,my,mp,dof; private float rx,ry,ra,xo,yo,disT,tx;
+    private int r,mx,my,mp,dof; private float rx,ry,ra,xo,yo,tx,ty,disT,shade=1;
     void drawRays3D(){
 
         glColor3f(0,1,1); glBegin(GL_QUADS); glVertex2i(526,  0); glVertex2i(1006,  0); glVertex2i(1006,160); glVertex2i(526,160); glEnd();
         glColor3f(0,0,1); glBegin(GL_QUADS); glVertex2i(526,160); glVertex2i(1006,160); glVertex2i(1006,320); glVertex2i(526,320); glEnd();
 
-        ra=pa-DR*30; if (ra<0){
+        ra=pa-DR*30;
+        if (ra<0){
             ra+=2*PI;
         } else if (ra>2*PI) {
             ra-=2*PI;
@@ -141,12 +142,14 @@ public class Render {
                 rx=vx;
                 ry=vy;
                 disT=disV;
+                shade = 1f;
                 glColor3f(0.9f,0,0);
             }
             if (disH<disV){
                 rx=hx;
                 ry=hy;
                 disT=disH;
+                shade = 0.5f;
                 glColor3f(0.7f,0,0);
             }
 
@@ -158,32 +161,36 @@ public class Render {
 
             float ca=pa-ra; if (ca<0){ca+=2*PI;} if (ca>2*PI){ca-=2*PI;}
             disT= (float) (disT*Math.cos(ca)); //Fix fisheye
-            float lineH=(mapS*320)/disT; if (lineH>320){lineH=320;} //Line height
-            float lineO=160-lineH/2; //Line offset
+            float lineH=(mapS*320)/disT; //Line height
 
-            float shade = 0.3f;
-            int y;
-            float ty=0;
             float ty_step= 32.0f/lineH;
+            float ty_off=0;
 
+            if (lineH>320){ty_off=(lineH-320)/2.0f; lineH=320; }
+            float lineO=160-((int)lineH>>1); //Line offset
+
+
+            //---Draw walls---
+            ty=ty_off*ty_step;
+
+            if (shade == 1){tx=(int)(ry/2.0f)%32; if (ra<3.14){tx=31-tx;}}
+            else {tx=(int)(rx/2.0f)%32; if (ra>1.57079633 && ra<4.71){tx=31-tx;}}
+
+            ty+=32;
+
+            int y;
             for (y=0;y<lineH;y++)
             {
-                float c=All_textures[(int)(ty)*32+(int)(tx)];
-                if (c==1){tx=(int)(rx/2.0f)%32;} if (ra > 180) {tx=31-tx;}
-                else{tx=(int)(ry/2.0f)%32; if (ra>90 && ra<270){tx=31-tx;}}
 
-                if (disV<disH){
-                    glColor3f(c-shade,c-shade,c-shade);
-                }
-                if (disH<disV){
-                    glColor3f(c,c,c);
-                }
+                float c=All_textures[(int)(ty)*32+(int)(tx)]*shade;
+                glColor3f(c,c,c);
                 glPointSize(8);
                 glBegin(GL_POINTS);
                 glVertex2f(r*8+530,y+lineO);
                 glEnd();
                 ty+=ty_step;
             }
+            //---Draw floor---
 
             ra+=DR; if (ra<0){
             ra+=2*PI;
