@@ -1,8 +1,5 @@
 import org.lwjgl.input.Keyboard;
 
-import java.awt.Window;
-import java.security.Key;
-
 import static org.lwjgl.opengl.GL11.*;
 
 public class Render {
@@ -23,6 +20,28 @@ public class Render {
         return pa;
     }
 
+    float cos(float a) {
+        return (float) Math.cos(a);
+    }
+
+    float sin(float a) {
+        return (float) Math.sin(a);
+    }
+
+    float FixAng(float a) {
+        if (a > 359) {
+            a -= 360;
+        }
+        if (a < 0) {
+            a += 360;
+        }
+        return a;
+    }
+
+    float RadtoDeg(float a) {
+        return (float) (a * 180 / PI);
+    }
+
     public void game() {
         buttons();
         drawMap2D();
@@ -37,18 +56,8 @@ public class Render {
         glBegin(GL_POINTS);
         glVertex2f(px, py);
         glEnd();
-
-        //drawLineOfSight();
         drawRays3D();
     }
-
-//    void drawLineOfSight(){
-//        glLineWidth(3);
-//        glBegin(GL_LINES);
-//        glVertex2f(px,py);
-//        glVertex2f(px+pdx*5,py+pdy*5);
-//        glEnd();
-//    }
 
     //---DRAW RAYS---
     Textures textures = new Textures();
@@ -215,11 +224,10 @@ public class Render {
 
             if (shade == 1) {
                 tx = (int) ((ry / 2.0f) % 32);
-                if(ra > degToRad(90) && ra < degToRad(270)) {
+                if (ra > degToRad(90) && ra < degToRad(270)) {
                     tx = 31 - tx;
                 }
-            }
-            else {
+            } else {
                 tx = (int) ((rx / 2.0f) % 32);
                 if (ra < degToRad(180)) {
                     tx = 31 - tx;
@@ -230,7 +238,18 @@ public class Render {
             for (y = 0; y < lineH; y++) {
 
                 float c = All_textures[(int) (ty) * 32 + (int) (tx)] * shade;
-                glColor3f(c, c, c);
+                if (hmt == 0) {
+                    glColor3f(c, c / 2, c / 2);
+                } //checkerboard
+                if (hmt == 1) {
+                    glColor3f(c, c, c / 2);
+                } //bricks
+                if (hmt == 2) {
+                    glColor3f(c / 2, c / 2, c);
+                } //window
+                if (hmt == 3) {
+                    glColor3f(c / 2, c, c / 2);
+                } //door
                 glPointSize(8);
                 glBegin(GL_POINTS);
                 glVertex2f(r * 8 + 530, y + lineO);
@@ -238,6 +257,30 @@ public class Render {
                 ty += ty_step;
             }
             //---Draw floor---
+            for (y = (int) (lineO + lineH); y < 320; y++) {
+                float dy = y - (320.0f / 2.0f);
+                float raFix = cos(pa - ra);
+                tx = px / 2 + cos(ra) * 158 * 32 / dy / raFix;
+                ty = py / 2 + sin(ra) * 158 * 32 / dy / raFix;
+
+                int mp=mapF[(int)(ty/32.0f)*mapX+(int)(tx/32.0f)]*32*32;
+
+                float c = All_textures[((int) (ty) & 31) * 32 + ((int) (tx) & 31)+mp] * 0.7f;
+                glColor3f(c, c, c);
+                glPointSize(8);
+                glBegin(GL_POINTS);
+                glVertex2f(r * 8 + 530, y);
+                glEnd();
+
+                //draw ceiling
+                mp=mapC[(int)(ty/32.0f)*mapX+(int)(tx/32.0f)]*32*32;
+                c = All_textures[((int) (ty) & 31) * 32 + ((int) (tx) & 31)+mp] * 0.7f;
+                glColor3f(c, c, c);
+                glPointSize(8);
+                glBegin(GL_POINTS);
+                glVertex2f(r * 8 + 530, 320-y);
+                glEnd();
+            }
 
             ra += DR;
             if (ra < 0) {
@@ -309,11 +352,6 @@ public class Render {
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_E)) { //interact button
-            ipx = (int) (px / 64.0f);
-            ipx_add_xo = (int) ((px + xo) / 64.0f);
-            ipy = (int) (py / 64.0f);
-            ipy_add_yo = (int) ((py + yo) / 64.0f);
-
             if (mapW[ipy_add_yo * mapX + ipx_add_xo] == 4) {
                 mapW[ipy_add_yo * mapX + ipx_add_xo] = 0;
             }
@@ -327,12 +365,34 @@ public class Render {
     int mapW[] = {
             2, 2, 2, 2, 2, 2, 2, 2,
             2, 0, 0, 0, 2, 0, 0, 2,
-            2, 0, 0, 0, 3, 0, 0, 3,
+            2, 0, 0, 0, 3, 4, 0, 3,
             2, 2, 4, 2, 2, 2, 0, 2,
-            2, 0, 0, 0, 0, 2, 0, 2,
-            3, 0, 0, 0, 0, 4, 0, 2,
-            2, 0, 0, 0, 0, 2, 0, 2,
+            2, 0, 0, 0, 0, 0, 0, 2,
+            3, 0, 0, 0, 0, 0, 0, 2,
+            2, 0, 0, 0, 0, 0, 0, 2,
             2, 2, 2, 2, 2, 2, 2, 2
+    };
+
+    int mapF[]={
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 1, 0, 0, 0,
+            0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 1, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 1, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0
+    };
+
+    int mapC[]={
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0
     };
 
     void drawMap2D() {
