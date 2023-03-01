@@ -69,7 +69,7 @@ public class WindowMain {
 
             Display.setResizable(false);
             Display.update();
-            Display.sync(60);
+            Display.sync(30);
         }
 
         Display.destroy();

@@ -236,13 +236,12 @@ public class Render {
 
             int y;
             for (y = 0; y < lineH; y++) {
-
-                float c = All_textures[(int) (ty) * 32 + (int) (tx)] * shade;
+                float c = All_textures[((int) (ty) * 32 + (int) (tx))%4096] * shade;
                 if (hmt == 0) {
                     glColor3f(c, c / 2, c / 2);
                 } //checkerboard
                 if (hmt == 1) {
-                    glColor3f(c, c, c / 2);
+                    glColor3f(0, 0, c/2);
                 } //bricks
                 if (hmt == 2) {
                     glColor3f(c / 2, c / 2, c);
@@ -263,9 +262,9 @@ public class Render {
                 tx = px / 2 + cos(ra) * 158 * 32 / dy / raFix;
                 ty = py / 2 + sin(ra) * 158 * 32 / dy / raFix;
 
-                int mp=mapF[(int)(ty/32.0f)*mapX+(int)(tx/32.0f)]*32*32;
+                int mp = mapF[(int) (ty / 32.0f) * mapX + (int) (tx / 32.0f)] * 32 * 32;
 
-                float c = All_textures[((int) (ty) & 31) * 32 + ((int) (tx) & 31)+mp] * 0.7f;
+                float c = All_textures[((int) (ty) & 31) * 32 + ((int) (tx) & 31) + mp] * 0.7f;
                 glColor3f(c, c, c);
                 glPointSize(8);
                 glBegin(GL_POINTS);
@@ -273,12 +272,12 @@ public class Render {
                 glEnd();
 
                 //draw ceiling
-                mp=mapC[(int)(ty/32.0f)*mapX+(int)(tx/32.0f)]*32*32;
-                c = All_textures[((int) (ty) & 31) * 32 + ((int) (tx) & 31)+mp] * 0.7f;
+                mp = mapC[(int) (ty / 32.0f) * mapX + (int) (tx / 32.0f)] * 32 * 32;
+                c = All_textures[((int) (ty) & 31) * 32 + ((int) (tx) & 31) + mp] * 0.7f;
                 glColor3f(c, c, c);
                 glPointSize(8);
                 glBegin(GL_POINTS);
-                glVertex2f(r * 8 + 530, 320-y);
+                glVertex2f(r * 8 + 530, 320 - y);
                 glEnd();
             }
 
@@ -365,15 +364,15 @@ public class Render {
     int mapW[] = {
             2, 2, 2, 2, 2, 2, 2, 2,
             2, 0, 0, 0, 2, 0, 0, 2,
-            2, 0, 0, 0, 3, 4, 0, 3,
-            2, 2, 4, 2, 2, 2, 0, 2,
+            2, 0, 0, 0, 4, 0, 0, 3,
+            2, 2, 4, 2, 2, 2, 4, 2,
             2, 0, 0, 0, 0, 0, 0, 2,
             3, 0, 0, 0, 0, 0, 0, 2,
             2, 0, 0, 0, 0, 0, 0, 2,
             2, 2, 2, 2, 2, 2, 2, 2
     };
 
-    int mapF[]={
+    int mapF[] = {
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 1, 0, 0, 0,
@@ -384,7 +383,7 @@ public class Render {
             0, 0, 0, 0, 0, 0, 0, 0
     };
 
-    int mapC[]={
+    int mapC[] = {
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
