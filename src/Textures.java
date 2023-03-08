@@ -12,6 +12,8 @@ public class Textures {
     public static int[] houseFloor;
     public static int[] houseCeiling;
     public static int[] Missing_Texture;
+
+    public static int[] WindowTrans;
     int[] readFileTexture(String file) {
         List<Integer> result = new ArrayList<Integer>();
         String line;

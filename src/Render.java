@@ -9,15 +9,14 @@ public class Render {
     private final double P2 = PI / 2;
     private final double P3 = 3 * PI / 2;
     private final float DR = 0.0174533f; //1 degree in radians
-    //---RENDER PLAYER---
     private final int mapX = 8;
     private final int mapY = 8;
     private final int mapS = 64;
     int[] mapW = {
             2, 2, 7, 2, 2, 5, 2, 2,
-            6, 0, 0, 0, 2, 0, 0, 2,
-            2, 0, 0, 0, 4, 0, 0, 3,
-            2, 2, 4, 2, 5, 2, 4, 2,
+            6, 0, 0, 0, 0, 0, 0, 2,
+            2, 0, 0, 0, 0, 0, 0, 3,
+            2, 0, 0, 0, 0, 0, 0, 2,
             2, 0, 0, 0, 0, 0, 0, 2,
             3, 0, 0, 0, 0, 0, 0, 3,
             2, 0, 0, 0, 0, 0, 0, 2,
@@ -43,6 +42,8 @@ public class Render {
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0
     };
+    //---DRAW SPRITES---
+    int[] depth = new int[120];
     private float px, py, pdx, pdy, pa;
     private int r, mx, my, mp, dof;
     private float rx, ry, ra, xo, yo, disT, shade = 1;
@@ -66,159 +67,121 @@ public class Render {
         return (float) Math.sin(a);
     }
 
+    float dist(float ax, float ay, float bx, float by, float ang) {
+        return (float) (Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay))); //pythagorean theorem, length of the ray
+    }
+    //---DRAW SPRITE---
+
+    float degToRad(float deg) {
+        return (float) ((deg * Math.PI) / 180);
+    }
+
     public void game() {
         buttons();
         drawRays3D();
+        //drawMap2D();
+        drawSprite();
+    }
+
+    Sprites spriteOne = new Sprites(1, 0, 0, 100, 172, 20);
+
+    float bandAid(float angle) {
+        return angle > 180 ? - (360 - angle) : angle;
+    }
+    void drawSprite() {
+        System.out.println(px + " " + py + " " + spriteOne.x + " " + spriteOne.y + " " + pa);
+        // calculate sprite's relative position to the player
+        float spriteX = spriteOne.x - px;
+        float spriteY = spriteOne.y - py;
+
+        // calculate sprite's distance from the player
+        float spriteDist = (float) Math.sqrt(spriteX * spriteX + spriteY * spriteY);
+
+        // calculate sprite's angle relative to the player's viewing angle
+        float spriteAngle = ((float) bandAid((float) Math.toDegrees(degToRad(bandAid(pa)) + (Math.atan2(spriteY, spriteX) ))));
+        if (spriteAngle < -180 && spriteX < 0 && spriteY < 0) spriteAngle += 360;
+        System.out.println("Sprite Angle: " + spriteAngle + " " + spriteDist);
+        System.out.println("Sprite X: " + spriteX + " Sprite Y: " + spriteY);
+
+        // calculate the sprite's size on the screen
+        float spriteSize = (float) ((960 / 2) / Math.tan(degToRad(60 / 2))) / spriteDist;
+
+        // calculate the top-left corner of the sprite on the screen
+        float spriteScreenX = (960 / 2) + spriteAngle * (960 / 60) - (spriteSize / 2);
+        float spriteScreenY = (640 / 2) - (spriteSize / 2);
+
+        // draw the sprite as a purple square
+        glColor3f(1, 0, 1); // set color to purple
+        glBegin(GL_POINTS);
+        glVertex2f(spriteScreenX, spriteScreenY);
+        glVertex2f(spriteScreenX, spriteScreenY + spriteSize);
+        glVertex2f(spriteScreenX + spriteSize, spriteScreenY + spriteSize);
+        glVertex2f(spriteScreenX + spriteSize, spriteScreenY);
+        glEnd();
+
     }
 
     //---RENDER MAP----
-
+    private float FixAng(float a){ if(a>359){ a-=360;} if(a<0){ a+=360;} return a;}
     void drawRays3D() {
-        ra = pa - DR * 30;
-        if (ra < 0) {
-            ra += 2 * PI;
-        } else if (ra > 2 * PI) {
-            ra -= 2 * PI;
-        }
-        for (r = 0; r < 120; r++) //Num of rays
+        int r,mx,my,mp,dof,side; float vx,vy,rx,ry,ra,xo = 0,yo = 0,disV,disH;
+
+        ra=FixAng(pa+30);                                                              //ray set back 30 degrees
+
+        for(r=0;r<120;r++)
         {
-            int vmt = 0, hmt = 0;
-            dof = 0;
-            float disH = 1000000000, hx = px, hy = py;
-            float aTan = (float) (-1 / Math.tan(ra));
+            int vmt=0,hmt=0;                                                              //vertical and horizontal map texture number
+            //---Vertical---
+            dof=0; side=0; disV=100000;
+            float Tan= (float) Math.tan(degToRad(ra));
+            if(cos(degToRad(ra))> 0.001){ rx=(((int)px>>6)<<6)+64;      ry=(px-rx)*Tan+py; xo= 64; yo=-xo*Tan;}//looking left
+            else if(cos(degToRad(ra))<-0.001){ rx= (float) ((((int)px>>6)<<6) -0.0001); ry=(px-rx)*Tan+py; xo=-64; yo=-xo*Tan;}//looking right
+            else { rx=px; ry=py; dof=8;}                                                  //looking up or down. no hit
 
-            //----CHECK HORIZONTAL LINE---
-            if (ra > PI) { //looking up
-                ry = (((int) py >> 6) << 6) - 0.0001f;
-                rx = (py - ry) * aTan + px;
-                yo = -64;
-                xo = -yo * aTan;
+            while(dof<8)
+            {
+                mx=(int)(rx)>>6; my=(int)(ry)>>6; mp=my*mapX+mx;
+                if(mp>0 && mp<mapX*mapY && mapW[mp]>0){ vmt=mapW[mp]-1; dof=8; disV=cos(degToRad(ra))*(rx-px)-sin(degToRad(ra))*(ry-py);}//hit
+                else{ rx+=xo; ry+=yo; dof+=1;}                                               //check next horizontal
+            }
+            vx=rx; vy=ry;
+
+            //---Horizontal---
+            dof=0; disH=100000;
+            Tan=1.0f/Tan;
+            if(sin(degToRad(ra))> 0.001){ ry=(((int)py>>6)<<6) -0.0001f; rx=(py-ry)*Tan+px; yo=-64; xo=-yo*Tan;}//looking up
+            else if(sin(degToRad(ra))<-0.001){ ry=(((int)py>>6)<<6)+64;      rx=(py-ry)*Tan+px; yo= 64; xo=-yo*Tan;}//looking down
+            else{ rx=px; ry=py; dof=8;}                                                   //looking straight left or right
+
+            while(dof<8)
+            {
+                mx=(int)(rx)>>6; my=(int)(ry)>>6; mp=my*mapX+mx;
+                if(mp>0 && mp<mapX*mapY && mapW[mp]>0){ hmt=mapW[mp]-1; dof=8; disH=cos(degToRad(ra))*(rx-px)-sin(degToRad(ra))*(ry-py);}//hit
+                else{ rx+=xo; ry+=yo; dof+=1;}                                               //check next horizontal
             }
 
-            if (ra < PI) { //looking down
-                ry = (((int) py >> 6) << 6) + 64;
-                rx = (py - ry) * aTan + px;
-                yo = 64;
-                xo = -yo * aTan;
-            }
+            float shade=1;
+            glColor3f(0,0.8f,0);
+            if(disV<disH){ hmt=vmt; shade=0.5f; rx=vx; ry=vy; disH=disV; glColor3f(0,0.6f,0);}//horizontal hit first
 
-            if (ra == 0 || ra == PI) {
-                rx = px;
-                ry = py;
-                dof = 8; //Looking straight left or right
-            }
+            int ca= (int) FixAng(pa-ra); disH=disH*cos(degToRad(ca));                            //fix fisheye
+            int lineH = (int) ((mapS*640)/(disH));
+            float ty_step=32.0f/(float)lineH;
+            float ty_off=0;
+            if(lineH>640){ ty_off=(lineH-640)/2.0f; lineH=640;}                            //line height and limit
+            int lineOff = 320 - (lineH>>1);                                               //line offset
 
-            while (dof < 8) {
-                mx = (int) (rx) >> 6;
-                my = (int) (ry) >> 6;
-                mp = my * mapX + mx;
-                if (mp > 0 && mp < mapX * mapY && mapW[mp] > 0) { //Hit wall
-                    hmt = mapW[mp] - 1;
-                    hx = rx;
-                    hy = ry;
-                    disH = dist(px, py, hx, hy, ra);
-                    dof = 8;
-                } else {
-                    rx += xo;
-                    ry += yo;
-                    dof += 1;
-                }
-            }
-
-            //----CHECK VERTICAL LINE----
-            dof = 0;
-            float disV = 1000000000, vx = px, vy = py;
-            float nTan = (float) (-Math.tan(ra));
-
-            if (ra > P2 && ra < P3) { //looking left
-                rx = (((int) px >> 6) << 6) - 0.0001f;
-                ry = (px - rx) * nTan + py;
-                xo = -64;
-                yo = -xo * nTan;
-            }
-
-            if (ra < P2 || ra > P3) { //looking right
-                rx = (((int) px >> 6) << 6) + 64;
-                ry = (px - rx) * nTan + py;
-                xo = 64;
-                yo = -xo * nTan;
-            }
-
-            if (ra == 0 || ra == PI) {
-                rx = px;
-                ry = py;
-                dof = 8; //Looking straight up or down
-            }
-
-            while (dof < 8) {
-                mx = (int) (rx) >> 6;
-                my = (int) (ry) >> 6;
-                mp = my * mapX + mx;
-                if (mp > 0 && mp < mapX * mapY && mapW[mp] > 0) { //Hit wall
-                    vmt = mapW[mp] - 1;
-                    vx = rx;
-                    vy = ry;
-                    disV = dist(px, py, vx, vy, ra);
-                    dof = 8;
-                } else {
-                    rx += xo;
-                    ry += yo;
-                    dof += 1;
-                }
-            }
-
-            if (disV < disH) {
-                hmt = vmt;
-                rx = vx;
-                ry = vy;
-                disT = disV;
-                shade = 1f;
-            }
-            if (disH < disV) {
-                rx = hx;
-                ry = hy;
-                disT = disH;
-                shade = 0.5f;
-            }
-
-            float ca = pa - ra;
-            if (ca < 0) {
-                ca += 2 * PI;
-            }
-            if (ca > 2 * PI) {
-                ca -= 2 * PI;
-            }
-            disT = (float) (disT * Math.cos(ca)); //Fix fisheye
-            float lineH = (mapS * 640) / disT; //Line height
-
-            float ty_step = 32.0f / lineH;
-            float ty_off = 0;
-
-            if (lineH > 640) {
-                ty_off = (lineH - 640) / 2.0f;
-                lineH = 640;
-            }
-            float lineO = 320 - ((int) lineH >> 1); //Line offset
-
+            depth[r]= (int) disH; //save this line's depth
 
             //---Draw walls---
             int y;
-            float ty = ty_off * ty_step; //+ hmt * 32;
+            float ty=ty_off*ty_step;//+hmt*32;
             float tx;
             int red = 0, green = 0, blue = 0;
 
 
-            if (shade == 1) {
-                tx = (int) ((ry / 2.0f) % 32);
-                if (ra > degToRad(90) && ra < degToRad(270)) {
-                    tx = 31 - tx;
-                }
-            } else {
-                tx = (int) ((rx / 2.0f) % 32);
-                if (ra < degToRad(180)) {
-                    tx = 31 - tx;
-                }
-            }
+            if(shade==1){ tx=(int)(rx/2.0)%32; if(ra>180){ tx=31-tx;}}
+            else        { tx=(int)(ry/2.0)%32; if(ra>90 && ra<270){ tx=31-tx;}}
 
             for (y = 0; y < lineH; y++) {
                 int pixel = ((int) ty * 32 + (int) tx) * 3 + (hmt * 32 * 32 * 3);
@@ -260,19 +223,18 @@ public class Render {
                 glPointSize(8);
                 glColor3ub((byte) red, (byte) green, (byte) blue);
                 glBegin(GL_POINTS);
-                glVertex2f(r * 8, y + lineO);
+                glVertex2f(r * 8, y + lineOff);
                 glEnd();
                 ty += ty_step;
             }
             //---Draw floor---
-            for (y = (int) (lineO + lineH); y < 640; y++) {
-                float dy = y - (640.0f / 2.0f);
-                float raFix = cos(pa - ra);
-                tx = px / 2 + cos(ra) * 158 * 2 * 32 / dy / raFix;
-                ty = py / 2 + sin(ra) * 158 * 2 * 32 / dy / raFix;
+            for (y = (int) (lineOff + lineH); y < 640; y++) {
+                float dy=y-(640/2.0f), deg=degToRad(ra), raFix=cos(degToRad(FixAng(pa-ra)));
+                tx=px/2 + cos(deg)*158*2*32/dy/raFix;
+                ty=py/2 - sin(deg)*158*2*32/dy/raFix;
+                mp=mapF[(int)(ty/32.0)*mapX+(int)(tx/32.0)]*32*32;
+                int pixel=(((int)(ty)&31)*32 + ((int)(tx)&31))*3+mp*3;
 
-                int mp = mapF[(int) (ty / 32.0f) * mapX + (int) (tx / 32.0f)] * 32 * 32;
-                int pixel = (((int) (ty) & 31) * 32 + ((int) (tx) & 31)) * 3 + mp * 3;
                 red = Textures.houseFloor[(pixel) % 3072];
                 green = Textures.houseFloor[(pixel + 1) % 3072];
                 blue = Textures.houseFloor[(pixel + 2) % 3072];
@@ -283,52 +245,30 @@ public class Render {
                 glEnd();
 
                 //draw ceiling
-                mp = mapC[(int) (ty / 32.0f) * mapX + (int) (tx / 32.0f)] * 32 * 32;
-                pixel = (((int) (ty) & 31) * 32 + ((int) (tx) & 31)) * 3 + mp * 3;
+                mp=mapC[(int)(ty/32.0)*mapX+(int)(tx/32.0)]*32*32;
+                pixel=(((int)(ty)&31)*32 + ((int)(tx)&31))*3+mp*3;
                 red = Textures.houseCeiling[(pixel) % 3072];
                 green = Textures.houseCeiling[(pixel + 1) % 3072];
                 blue = Textures.houseCeiling[(pixel + 2) % 3072];
+
                 glPointSize(8);
                 glColor3ub((byte) (red * 0.7), (byte) (green * 0.7), (byte) (blue * 0.7));
                 glBegin(GL_POINTS);
                 glVertex2f(r * 8, 640 - y);
                 glEnd();
-            }
 
-            ra += DR / 2;
-            if (ra < 0) {
-                ra += 2 * PI;
-            } else if (ra > 2 * PI) {
-                ra -= 2 * PI;
             }
+            ra=FixAng(ra-0.5f);
         }
-    }
-
-    float dist(float ax, float ay, float bx, float by, float ang) {
-        return (float) (Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay))); //pythagorean theorem, length of the ray
-    }
-
-    float degToRad(float deg) {
-        return (float) ((deg * Math.PI) / 180);
     }
 
     void buttons() {
 
         if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-            pa -= 0.1;
-            if (pa < 0) {
-                pa += 2 * PI;
-            }
-            pdx = (float) Math.cos(pa) * 5;
-            pdy = (float) Math.sin(pa) * 5;
+            pa+=3; pa=FixAng(pa); pdx=cos(degToRad(pa)); pdy=-sin(degToRad(pa));
         }
         if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-            pa += 0.1;
-            if (pa > 2 * PI) {
-                pa -= 2 * PI;
-            }
-            pdx = (float) Math.cos(pa) * 5;
-            pdy = (float) Math.sin(pa) * 5;
+            pa-=3; pa=FixAng(pa); pdx=cos(degToRad(pa)); pdy=-sin(degToRad(pa));
         }
 
         int xo = 0;
@@ -349,19 +289,19 @@ public class Render {
 
         if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
             if (mapW[ipy * mapX + ipx_add_xo] == 0) {
-                px += pdx;
+                px += 3 * pdx;
             } //Collision detection
             if (mapW[ipy_add_yo * mapX + ipx] == 0) {
-                py += pdy;
+                py += 3 * pdy;
             } //If map[x] == 1 don't move
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
             if (mapW[ipy * mapX + ipx_sub_xo] == 0) {
-                px -= pdx;
+                px -= 3 * pdx;
             }
             if (mapW[ipy_sub_yo * mapX + ipx] == 0) {
-                py -= pdy;
+                py -= 3 * pdy;
             }
         }
 
@@ -382,6 +322,29 @@ public class Render {
 //                        2, 2, 2, 3, 6, 2, 2, 2
 //                };
 //            }
+        }
+    }
+
+    void drawMap2D() {
+        int y, x, yo, xo;
+        for (y = 0; y < mapY; y++) {
+            for (x = 0; x < mapX; x++) {
+                if (mapW[y * mapX + x] > 0) {
+                    glColor3f(1, 1, 1);
+                } else glColor3f(0, 0, 0);
+                xo = x * mapS;
+                yo = y * mapS;
+                glBegin(GL_QUADS);
+                glVertex2i(xo + 1, yo + 1);
+                glVertex2i(xo + 1, yo + mapS - 1);
+                glVertex2i(xo + mapS - 1, yo + mapS - 1);
+                glVertex2i(xo + mapS - 1, yo + 1);
+                glVertex2i(xo + 1, yo + 1);
+                glVertex2i(xo + 1, yo + mapS - 1);
+                glVertex2i(xo + mapS - 1, yo + mapS - 1);
+                glVertex2i(xo + mapS - 1, yo + 1);
+                glEnd();
+            }
         }
     }
 }

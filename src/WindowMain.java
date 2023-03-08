@@ -4,12 +4,13 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
 import java.awt.*;
+import java.util.Arrays;
 
 import static org.lwjgl.opengl.GL11.*;
 
 public class WindowMain {
 
-    private final int width = 955;
+    private final int width = 960;
     private final int height = 640;
 
     //-----FPS-----
@@ -47,10 +48,10 @@ public class WindowMain {
         glOrtho(0, width, height, 0, 1.0f, -1.0f);
         glMatrixMode(GL_MODELVIEW);
 
-
+        //INITIALIZE SPRITE
         Render render = new Render();
         float pa = render.getPa();
-        render.setData(((float) Math.cos(pa) * 5), ((float) Math.sin(pa) * 5), 300, 300);
+        render.setData(((float) Math.cos(pa) * 5), ((float) Math.sin(pa) * 5), 150, 400);
 
         //render loop
         while (!Display.isCloseRequested()) {
