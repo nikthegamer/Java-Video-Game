@@ -39,6 +39,7 @@ public class WindowMain {
         Textures.houseDecoOne = textures.readFileTexture("src/Textures/Wall_deco_1.csv");
         Textures.houseDecoTwo = textures.readFileTexture("src/Textures/Wall_deco_2.csv");
         Textures.Missing_Texture = textures.readFileTexture("src/Textures/Missing_Texture.csv");
+        Textures.WindowTrans = textures.readFileTexture("src/Textures/test.csv");
         //TEXTURES
 
         //Initialize code OpenGL

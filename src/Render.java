@@ -1,14 +1,14 @@
+import org.lwjgl.BufferUtils;
 import org.lwjgl.input.Keyboard;
 
+import java.nio.ByteBuffer;
+
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL30.glGenerateMipmap;
 
 public class Render {
     //---DRAW RAYS---
-
-    private final double PI = Math.PI;
-    private final double P2 = PI / 2;
-    private final double P3 = 3 * PI / 2;
-    private final float DR = 0.0174533f; //1 degree in radians
+    int red = 0, green = 0, blue = 0;
     private final int mapX = 8;
     private final int mapY = 8;
     private final int mapS = 64;
@@ -45,8 +45,6 @@ public class Render {
     //---DRAW SPRITES---
     int[] depth = new int[120];
     private float px, py, pdx, pdy, pa;
-    private int r, mx, my, mp, dof;
-    private float rx, ry, ra, xo, yo, disT, shade = 1;
 
     public void setData(float pdx, float pdy, float px, float py) {
         this.pdx = pdx;
@@ -66,10 +64,6 @@ public class Render {
     float sin(float a) {
         return (float) Math.sin(a);
     }
-
-    float dist(float ax, float ay, float bx, float by, float ang) {
-        return (float) (Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay))); //pythagorean theorem, length of the ray
-    }
     //---DRAW SPRITE---
 
     float degToRad(float deg) {
@@ -88,6 +82,13 @@ public class Render {
     float bandAid(float angle) {
         return angle > 180 ? - (360 - angle) : angle;
     }
+    public static byte[] convertIntArrayToByteArray(int[] intArray) {
+        byte[] byteArray = new byte[intArray.length];
+        for (int i = 0; i < intArray.length; i++) {
+            byteArray[i] = (byte) intArray[i];
+        }
+        return byteArray;
+    }
     void drawSprite() {
         System.out.println(px + " " + py + " " + spriteOne.x + " " + spriteOne.y + " " + pa);
         // calculate sprite's relative position to the player
@@ -100,23 +101,49 @@ public class Render {
         // calculate sprite's angle relative to the player's viewing angle
         float spriteAngle = ((float) bandAid((float) Math.toDegrees(degToRad(bandAid(pa)) + (Math.atan2(spriteY, spriteX) ))));
         if (spriteAngle < -180 && spriteX < 0 && spriteY < 0) spriteAngle += 360;
-        System.out.println("Sprite Angle: " + spriteAngle + " " + spriteDist);
-        System.out.println("Sprite X: " + spriteX + " Sprite Y: " + spriteY);
 
         // calculate the sprite's size on the screen
-        float spriteSize = (float) ((960 / 2) / Math.tan(degToRad(60 / 2))) / spriteDist;
+        float spriteSize = 12 * (float) ((960 / 2) / Math.tan(degToRad(60 / 2))) / spriteDist;
 
         // calculate the top-left corner of the sprite on the screen
         float spriteScreenX = (960 / 2) + spriteAngle * (960 / 60) - (spriteSize / 2);
         float spriteScreenY = (640 / 2) - (spriteSize / 2);
 
         // draw the sprite as a purple square
-        glColor3f(1, 0, 1); // set color to purple
-        glBegin(GL_POINTS);
-        glVertex2f(spriteScreenX, spriteScreenY);
-        glVertex2f(spriteScreenX, spriteScreenY + spriteSize);
-        glVertex2f(spriteScreenX + spriteSize, spriteScreenY + spriteSize);
-        glVertex2f(spriteScreenX + spriteSize, spriteScreenY);
+        // Enable texturing
+        glEnable(GL_TEXTURE_2D);
+// Generate texture ID in the VRAM
+        int textureID = glGenTextures();
+
+// the unsigned int texture is now the ID of the texture in the actual GPU memory
+
+// this tells the GPU to enable the texture
+        glBindTexture(GL_TEXTURE_2D, textureID);
+
+// set texture parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+// Actually load the texture into memory, the texture is represented by "data" in the form of
+// data[3 * height * width] where its stored as R, G, B, R, G, B and so on
+// here width, height and data need to be the actual "texture" ur gonna apply to the quad
+        byte[] textureData = convertIntArrayToByteArray(Textures.WindowTrans);
+        ByteBuffer data = BufferUtils.createByteBuffer(3072);
+        data.put(textureData);
+        data.flip();
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 32, 32, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glBegin(GL_QUADS);
+        glTexCoord2f(0, 0); glVertex2f(spriteScreenX, spriteScreenY);
+        glTexCoord2f(0, 1); glVertex2f(spriteScreenX, spriteScreenY + spriteSize);
+        glTexCoord2f(1, 1); glVertex2f(spriteScreenX + spriteSize, spriteScreenY + spriteSize);
+        glTexCoord2f(1, 0); glVertex2f(spriteScreenX + spriteSize, spriteScreenY);
+        glEnd();
+
+        // disable texture mapping
+        glDisable(GL_TEXTURE_2D);
         glEnd();
 
     }
@@ -177,7 +204,6 @@ public class Render {
             int y;
             float ty=ty_off*ty_step;//+hmt*32;
             float tx;
-            int red = 0, green = 0, blue = 0;
 
 
             if(shade==1){ tx=(int)(rx/2.0)%32; if(ra>180){ tx=31-tx;}}
@@ -228,7 +254,7 @@ public class Render {
                 ty += ty_step;
             }
             //---Draw floor---
-            for (y = (int) (lineOff + lineH); y < 640; y++) {
+            for (y = (lineOff + lineH); y < 640; y++) {
                 float dy=y-(640/2.0f), deg=degToRad(ra), raFix=cos(degToRad(FixAng(pa-ra)));
                 tx=px/2 + cos(deg)*158*2*32/dy/raFix;
                 ty=py/2 - sin(deg)*158*2*32/dy/raFix;
