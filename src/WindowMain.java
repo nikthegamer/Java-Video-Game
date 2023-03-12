@@ -3,20 +3,17 @@ import org.lwjgl.input.Keyboard;
 import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
-import java.awt.*;
-import java.util.Arrays;
-
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL14.glBlendFuncSeparate;
 
 public class WindowMain {
 
     private final int width = 960;
     private final int height = 640;
-
+    private final double ns = 1000000000.0 / 60.0;
     //-----FPS-----
     private long lastTime = System.nanoTime();
     private double delta = 0.0;
-    private final double ns = 1000000000.0 / 60.0;
     private long timer = System.currentTimeMillis();
     private int frames = 0;
 
@@ -39,7 +36,7 @@ public class WindowMain {
         Textures.houseDecoOne = textures.readFileTexture("src/Textures/Wall_deco_1.csv");
         Textures.houseDecoTwo = textures.readFileTexture("src/Textures/Wall_deco_2.csv");
         Textures.Missing_Texture = textures.readFileTexture("src/Textures/Missing_Texture.csv");
-        Textures.WindowTrans = textures.readFileTexture("src/Textures/test.csv");
+        Textures.WindowTrans = textures.readFileTexture("src/Textures/testSmall.csv");
         //TEXTURES
 
         //Initialize code OpenGL
@@ -48,7 +45,12 @@ public class WindowMain {
         glLoadIdentity();
         glOrtho(0, width, height, 0, 1.0f, -1.0f);
         glMatrixMode(GL_MODELVIEW);
+        glEnable(GL_BLEND);// Enable the OpenGL Blending functionality
+        glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
+        //glBlendFunc(GL_SRC_COLOR, GL_BLEND_COLOR);// Set the blend mode to blend our current RGBA with what is already in the buffer
+        //In your case, this means that the source0 color will be multiplied by itself (therefore making the result darker).
+        //glBlendFunc (GL_ONE, GL_ONE);
         //INITIALIZE SPRITE
         Render render = new Render();
         float pa = render.getPa();
@@ -65,9 +67,9 @@ public class WindowMain {
                 delta--;
             }
 
-            glClear(GL_COLOR_BUFFER_BIT);
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             render.game();
-
+            glFlush();
             frames++;
 
             //-----FPS-----
