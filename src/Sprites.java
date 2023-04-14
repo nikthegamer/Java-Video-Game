@@ -4,10 +4,9 @@ public class Sprites {
     int type; // static, key, enemy
     int state; //on off
     int map; // texture
-    float posX, posY, posZ; // position
-    float width = 5, height = 5;
-    String filename;
+    float posX, posY, spriteZ; // position
     int textureID;
+    int screenWidth = 960, screenHeight = 640;
 
     public Sprites(int type, int state, int map, float x, float y, float z, String filename) {
         this.textureID = new ImageTextures(filename).id;
@@ -16,26 +15,35 @@ public class Sprites {
         this.map = map;
         this.posX = x;
         this.posY = y;
-        this.posZ = z;
+        this.spriteZ = z;
     }
 
-//    void bindImage(String filename){
-//        ImageTextures test = new ImageTextures(filename);
-//        test.bind();
-//    }
-
-    int screenWidth = 960,screenHeight = 640;
     float bandAid(float angle) {
         return angle > 180 ? -(360 - angle) : angle;
     }
+
     float degToRad(float deg) {
         return (float) ((deg * Math.PI) / 180);
     }
 
-    public final void renderSprite(float px, float py, float pa){
-        //System.out.println(px + " " + py + " " + spriteOne.x + " " + spriteOne.y + " " + pa);
-        // calculate sprite's relative position to the player
+    public final void renderSprite(float px, float py, float pa, int[] depth) {
 
+        glEnable(GL_TEXTURE_2D);
+
+        float sx = this.posX - px;
+        float sy = this.posY - py;
+        float sz = 20;
+
+        float CS = (float) Math.cos(degToRad(pa)), SN = (float) Math.sin(degToRad(pa));
+        float a = sy * CS + sx * SN;
+        float b = sx * CS - sy * SN;
+        sx = a;
+        sy = b;
+
+        sx = (sx * 108.0f / sy) + (120 / 2); //I love magic numbers!!!
+        sy = (sz * 108.0f / sy) + (80 / 2);
+
+        float spriteZ = this.spriteZ;
         float spriteX = this.posX - px;
         float spriteY = this.posY - py;
 
@@ -57,21 +65,23 @@ public class Sprites {
         // Enable texturing
         glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, this.textureID);
-        glBegin(GL_QUADS);
-        glColor3f(1.0f,1.0f,1.0f);
-        glTexCoord2f(0, 0);
-        glVertex2f(spriteScreenX, spriteScreenY);
-        glTexCoord2f(0, 1);
-        glVertex2f(spriteScreenX, spriteScreenY + spriteSize);
-        glTexCoord2f(1, 1);
-        glVertex2f(spriteScreenX + spriteSize, spriteScreenY + spriteSize);
-        glTexCoord2f(1, 0);
-        glVertex2f(spriteScreenX + spriteSize, spriteScreenY);
-        glEnd();
-
+        glEnable(GL_DEPTH_TEST);
+        if (sx > 0 && sx < 120 && b < depth[(int) sx]) {
+            glBegin(GL_QUADS);
+            System.out.println(spriteAngle);
+            glColor3f(1.0f, 1.0f, 1.0f);
+            glTexCoord2f(0, 0);
+            glVertex2f(spriteScreenX, spriteScreenY);
+            glTexCoord2f(0, 1);
+            glVertex2f(spriteScreenX, spriteScreenY + spriteSize);
+            glTexCoord2f(1, 1);
+            glVertex2f(spriteScreenX + spriteSize, spriteScreenY + spriteSize);
+            glTexCoord2f(1, 0);
+            glVertex2f(spriteScreenX + spriteSize, spriteScreenY);
+            glEnd();
+        }
         // disable texture mapping
         glDisable(GL_TEXTURE_2D);
         glFinish(); // Block until all GL executions are completed.
-        glEnd();
     }
 }

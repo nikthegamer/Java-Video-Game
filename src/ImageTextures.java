@@ -44,9 +44,6 @@ public class ImageTextures {
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0 , GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-//            glFlush(); // Clear all GL executions.
-//            glFinish(); // Block until all GL executions are completed.
-//            glEnd();
 
         } catch (IOException e) {
             throw new RuntimeException(e);

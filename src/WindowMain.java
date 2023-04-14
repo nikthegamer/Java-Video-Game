@@ -4,6 +4,7 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.opengl.GL14.GL_GENERATE_MIPMAP;
 import static org.lwjgl.opengl.GL14.glBlendFuncSeparate;
 
 public class WindowMain {
@@ -46,6 +47,10 @@ public class WindowMain {
         glOrtho(0, width, height, 0, 1.0f, -1.0f);
         glMatrixMode(GL_MODELVIEW);
         glEnable(GL_BLEND);// Enable the OpenGL Blending functionality
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_LEQUAL);
+        glDepthMask(true);
+        glEnable(GL_CULL_FACE);
         glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
         //glBlendFunc(GL_SRC_COLOR, GL_BLEND_COLOR);// Set the blend mode to blend our current RGBA with what is already in the buffer
@@ -69,6 +74,7 @@ public class WindowMain {
 
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             render.game();
+            glCullFace(GL_BACK);//This will cause OpenGL to not render any polygons that are facing away from the camera.
             glFlush();
             frames++;
 

@@ -9,17 +9,18 @@ public class Render {
     private final int mapX = 8;
     private final int mapY = 8;
     private final int mapS = 64;
+    public int[] depth = new int[120];
     int red, green, blue;
     //---DRAW RAYS---
     int[] mapW = {
             2, 2, 7, 2, 2, 5, 2, 2,
-            6, 0, 0, 0, 0, 0, 0, 2,
-            2, 0, 0, 0, 0, 0, 0, 3,
-            2, 0, 0, 0, 0, 0, 0, 2,
-            2, 0, 0, 0, 0, 0, 0, 2,
-            3, 0, 0, 0, 0, 0, 0, 3,
-            2, 0, 0, 0, 0, 0, 0, 2,
-            2, 2, 2, 3, 6, 2, 2, 2
+            6, 0, 0, 0, 6, 0, 0, 2,
+            2, 0, 0, 0, 4, 0, 0, 3,
+            2, 6, 4, 2, 5, 6, 4, 2,
+            2, 0, 0, 0, 4, 0, 0, 2,
+            3, 0, 0, 0, 5, 0, 0, 4,
+            2, 0, 0, 0, 2, 0, 0, 2,
+            2, 2, 2, 3, 4, 2, 2, 2
     };
     int[] mapF = {
             0, 0, 0, 0, 0, 0, 0, 0,
@@ -29,7 +30,7 @@ public class Render {
             0, 0, 0, 1, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 1, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+            0, 0, 0, 0, 0, 0, 0, 0,
     };
     int[] mapC = {
             0, 0, 0, 0, 0, 0, 0, 0,
@@ -42,26 +43,16 @@ public class Render {
             0, 0, 0, 0, 0, 0, 0, 0
     };
     //---DRAW SPRITES---
-    int[] depth = new int[120];
-    Sprites spriteTwo = new Sprites(1, 0, 0, 150, 300, 20, "src/Textures/unknown.png");
-    Sprites spriteThree = new Sprites(1, 0, 0, 150, 300, 20, "src/Textures/unknown.png");
-    //---DRAW SPRITE---
-    List<Sprites> spritesList = new ArrayList<Sprites>(){{
-        add(new Sprites(1, 0, 0, 100, 172, 20, "src/Textures/unknown.png"));
-        add(new Sprites(1, 0, 0, 150, 300, 20, "src/Textures/evil.png"));
-        add(new Sprites(1, 0, 0, 150, 314, 20, "src/Textures/Textures/TakeThemOutTakeThemOutTheWormsTakeThemOut.png"));
+    int state = 1;
+    List<Sprites> spritesList = new ArrayList<Sprites>() {{
+        //pa < 180
+        add(new Sprites(1, 0, 0, 150, 314, 0.5f, "src/Textures/Textures/TakeThemOutTakeThemOutTheWormsTakeThemOut.png"));
+        //180 < pa
+        add(new Sprites(1, 0, 0, 350, 170, 0.7f, "src/Textures/unknown.png"));
     }};
     //????
     private float px, py, pdx, pdy, pa;
 
-    //
-//    public static byte[] convertIntArrayToByteArray(int[] intArray) {
-//        byte[] byteArray = new byte[intArray.length];
-//        for (int i = 0; i < intArray.length; i++) {
-//            byteArray[i] = (byte) intArray[i];
-//        }
-//        return byteArray;
-//    }
     public void setData(float pdx, float pdy, float px, float py) {
         this.pdx = pdx;
         this.pdy = pdy;
@@ -90,10 +81,9 @@ public class Render {
         drawRays3D();
         drawSpritesTest();
     }
-
     void drawSpritesTest() {
-        for(var sprite:spritesList){
-            sprite.renderSprite(px,py,pa);
+        for (var sprite : spritesList) {
+            sprite.renderSprite(px, py, pa, depth);
         }
     }
 
@@ -110,7 +100,7 @@ public class Render {
 
     void drawRays3D() {
         int r, mx, my, mp, dof, side;
-        float vx, vy, rx, ry, ra, xo = 0, yo = 0, disV, disH;
+        float vx, vy, rx, ry, ra, xo = 0, yo = 0, disV, disH, zBuffer = 1f;
 
         ra = FixAng(pa + 30);                                                              //ray set back 30 degrees
 
@@ -195,6 +185,7 @@ public class Render {
                 }                                               //check next horizontal
             }
 
+            int spriteState = 1;
             float shade = 1;
             glColor3f(0, 0.8f, 0);
             if (disV < disH) {
@@ -218,27 +209,28 @@ public class Render {
             int lineOff = 320 - (lineH >> 1);                                               //line offset
 
             depth[r] = (int) disH; //save this line's depth
-
             //---Draw walls---
             int y;
             float ty = ty_off * ty_step;//+hmt*32;
             float tx;
 
 
-            if (shade == 1) {
+            if (shade == 1) { //VERTICAL
                 tx = (int) (rx / 2.0) % 32;
                 if (ra > 180) {
                     tx = 31 - tx;
                 }
-            } else {
+                //System.out.println("pa = " + FixAng(pa));
+            } else { //HORIZONTAL
                 tx = (int) (ry / 2.0) % 32;
                 if (ra > 90 && ra < 270) {
                     tx = 31 - tx;
                 }
             }
-
             for (y = 0; y < lineH; y++) {
                 int pixel = ((int) ty * 32 + (int) tx) * 3 + (hmt * 32 * 32 * 3);
+                //System.out.println("px : " + px); //top left = 84  / bottom right = 84
+                //System.out.println("py : " + py); //top left = 429   / bottom right = 429
                 if (hmt == 0) {
                     red = (int) (Textures.Missing_Texture[(pixel) % 3072] * shade);
                     green = (int) (Textures.Missing_Texture[(pixel + 1) % 3072] * shade);
@@ -277,8 +269,9 @@ public class Render {
                 glPointSize(8);
                 glColor3ub((byte) red, (byte) green, (byte) blue);
                 glBegin(GL_POINTS);
-                glVertex2f(r * 8, y + lineOff);
+                glVertex3f(r * 8, y + lineOff, zBuffer);
                 glEnd();
+
                 ty += ty_step;
             }
             //---Draw floor---
@@ -295,7 +288,7 @@ public class Render {
                 glPointSize(8);
                 glColor3ub((byte) red, (byte) green, (byte) blue);
                 glBegin(GL_POINTS);
-                glVertex2f(r * 8, y);
+                glVertex3f(r * 8, y, 1);
                 glEnd();
 
                 //draw ceiling
@@ -308,7 +301,7 @@ public class Render {
                 glPointSize(8);
                 glColor3ub((byte) (red * 0.7), (byte) (green * 0.7), (byte) (blue * 0.7));
                 glBegin(GL_POINTS);
-                glVertex2f(r * 8, 640 - y);
+                glVertex3f(r * 8, 640 - y, 1);
                 glEnd();
 
             }
@@ -330,7 +323,6 @@ public class Render {
             pdx = cos(degToRad(pa));
             pdy = -sin(degToRad(pa));
         }
-
         int xo = 0;
         if (pdx < 0) {
             xo = -20;
@@ -370,18 +362,18 @@ public class Render {
                 mapW[ipy_add_yo * mapX + ipx_add_xo] = 0;
             }
 
-//            if (mapW[ipy_add_yo * mapX + ipx_add_xo] == 7) {
-//                mapW = new int[]{
-//                        2, 2, 7, 2, 2, 5, 2, 2,
-//                        6, 0, 0, 0, 0, 0, 0, 2,
-//                        2, 0, 0, 0, 0, 0, 0, 3,
-//                        2, 0, 0, 0, 0, 2, 4, 2,
-//                        2, 0, 0, 0, 0, 0, 0, 2,
-//                        3, 0, 0, 0, 0, 0, 0, 3,
-//                        2, 0, 0, 0, 0, 0, 0, 2,
-//                        2, 2, 2, 3, 6, 2, 2, 2
-//                };
-//            }
+            if (mapW[ipy_add_yo * mapX + ipx_add_xo] == 7) {
+                mapW = new int[]{
+                        2, 2, 7, 2, 2, 5, 2, 2,
+                        6, 0, 0, 0, 0, 0, 0, 2,
+                        2, 0, 0, 0, 0, 0, 0, 3,
+                        2, 0, 0, 0, 0, 2, 4, 2,
+                        2, 0, 0, 0, 0, 0, 0, 2,
+                        3, 0, 0, 0, 0, 0, 0, 3,
+                        2, 0, 0, 0, 0, 0, 0, 2,
+                        2, 2, 2, 3, 6, 2, 2, 2
+                };
+            }
         }
     }
 
