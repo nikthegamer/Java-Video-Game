@@ -4,7 +4,6 @@ import org.lwjgl.opengl.Display;
 import org.lwjgl.opengl.DisplayMode;
 
 import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.opengl.GL14.GL_GENERATE_MIPMAP;
 import static org.lwjgl.opengl.GL14.glBlendFuncSeparate;
 
 public class WindowMain {
@@ -12,11 +11,11 @@ public class WindowMain {
     private final int width = 960;
     private final int height = 640;
     private final double ns = 1000000000.0 / 60.0;
+    public int frames = 0;
     //-----FPS-----
     private long lastTime = System.nanoTime();
     private double delta = 0.0;
     private long timer = System.currentTimeMillis();
-    private int frames = 0;
 
     public void run() {
         try {
@@ -29,15 +28,23 @@ public class WindowMain {
 
         //TEXTURE Initialization
         Textures textures = new Textures();
-        Textures.houseWall = textures.readFileTexture("src/Textures/Wall.csv");
-        Textures.houseDoor = textures.readFileTexture("src/Textures/Door.csv");
-        Textures.houseWindow = textures.readFileTexture("src/Textures/Window.csv");
-        Textures.houseCeiling = textures.readFileTexture("src/Textures/Ceiling.csv");
-        Textures.houseFloor = textures.readFileTexture("src/Textures/Floor.csv");
-        Textures.houseDecoOne = textures.readFileTexture("src/Textures/Wall_deco_1.csv");
-        Textures.houseDecoTwo = textures.readFileTexture("src/Textures/Wall_deco_2.csv");
+        //HOUSE
+        Textures.houseWall = textures.readFileTexture("src/Textures/House/Wall.csv");
+        Textures.houseDoor = textures.readFileTexture("src/Textures/House/Door.csv");
+        Textures.houseWindow = textures.readFileTexture("src/Textures/House/Window.csv");
+        Textures.houseCeiling = textures.readFileTexture("src/Textures/House/Ceiling.csv");
+        Textures.houseFloor = textures.readFileTexture("src/Textures/House/Floor.csv");
+        Textures.houseDecoOne = textures.readFileTexture("src/Textures/House/Wall_deco_1.csv");
+        Textures.houseDecoTwo = textures.readFileTexture("src/Textures/House/Wall_deco_2.csv");
         Textures.Missing_Texture = textures.readFileTexture("src/Textures/Missing_Texture.csv");
-        Textures.WindowTrans = textures.readFileTexture("src/Textures/testSmall.csv");
+        //OUTSIDE
+        Textures.OutsideGround = textures.readFileTexture("src/Textures/Outside/OutsideGround.csv");
+        Textures.OutsideSky = textures.readFileTexture("src/Textures/Outside/OutsideSky.csv");
+        Textures.OutsideWall = textures.readFileTexture("src/Textures/Outside/OutsideWall.csv");
+        //SEWER
+        Textures.SewerCeiling = textures.readFileTexture("src/Textures/Sewer/SewerCeiling.csv");
+        Textures.SewerFloor = textures.readFileTexture("src/Textures/Sewer/SewerFloor.csv");
+        Textures.SewerWall = textures.readFileTexture("src/Textures/Sewer/SewerWall.csv");
         //TEXTURES
 
         //Initialize code OpenGL

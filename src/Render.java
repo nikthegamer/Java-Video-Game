@@ -12,44 +12,117 @@ public class Render {
     public int[] depth = new int[120];
     int red, green, blue;
     //---DRAW RAYS---
-    int[] mapW = {
-            2, 2, 7, 2, 2, 5, 2, 2,
-            6, 0, 0, 0, 6, 0, 0, 2,
-            2, 0, 0, 0, 4, 0, 0, 3,
-            2, 6, 4, 2, 5, 6, 4, 2,
-            2, 0, 0, 0, 4, 0, 0, 2,
-            3, 0, 0, 0, 5, 0, 0, 4,
-            2, 0, 0, 0, 2, 0, 0, 2,
-            2, 2, 2, 3, 4, 2, 2, 2
+    int mapNum = 0;
+    int[][] mapW = {
+            {
+                    2, 2, 7, 2, 2, 5, 2, 2,
+                    6, 0, 0, 0, 6, 0, 0, 2,
+                    2, 0, 0, 0, 4, 0, 0, 3,
+                    2, 6, 4, 2, 5, 6, 4, 2,
+                    2, 0, 0, 0, 4, 0, 0, 2,
+                    3, 0, 0, 0, 5, 0, 0, 4,
+                    2, 0, 0, 0, 2, 0, 0, 2,
+                    2, 2, 2, 3, 4, 2, 2, 2
+            },
+            {
+                    11, 11, 11, 11, 11, 11, 11, 11,
+                    11, 0, 0, 0, 0, 0, 0, 11,
+                    11, 0, 0, 0, 0, 0, 0, 11,
+                    11, 0, 0, 0, 0, 0, 0, 11,
+                    11, 0, 0, 0, 0, 0, 0, 11,
+                    11, 0, 0, 0, 0, 0, 0, 11,
+                    11, 0, 0, 0, 0, 0, 0, 11,
+                    2, 2, 12, 2, 3, 2, 2, 2
+            },
+            {
+                    2, 2, 7, 2, 2, 5, 2, 2,
+                    6, 0, 0, 0, 0, 0, 0, 2,
+                    2, 0, 0, 0, 0, 0, 0, 3,
+                    2, 0, 0, 0, 0, 2, 4, 2,
+                    2, 0, 0, 0, 0, 0, 0, 2,
+                    3, 0, 0, 0, 0, 0, 0, 3,
+                    2, 0, 0, 0, 0, 0, 0, 2,
+                    2, 2, 2, 3, 6, 2, 2, 2
+            }
     };
-    int[] mapF = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 1, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 1, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 1, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
+    int[][] mapF = {
+            {
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 1, 0, 0, 0,
+                    0, 0, 0, 1, 0, 0, 0, 0,
+                    0, 0, 0, 1, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 1, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+            },
+            {
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+            },
+            {
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1
+            }
     };
-    int[] mapC = {
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0
+    int[][] mapC = {
+            {
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0
+            },
+            {
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0,
+                    0, 0, 0, 0, 0, 0, 0, 0
+            },
+            {
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1,
+                    1, 1, 1, 1, 1, 1, 1, 1
+            }
     };
     //---DRAW SPRITES---
     int state = 1;
-    List<Sprites> spritesList = new ArrayList<Sprites>() {{
-        //pa < 180
-        add(new Sprites(1, 0, 0, 150, 314, 0.5f, "src/Textures/Textures/TakeThemOutTakeThemOutTheWormsTakeThemOut.png"));
-        //180 < pa
-        add(new Sprites(1, 0, 0, 350, 170, 0.7f, "src/Textures/unknown.png"));
+    List<Sprites> spritesListOne = new ArrayList<Sprites>() {{
+        add(new Sprites(1, 1, 0, 150, 314, 0.5f, "src/Textures/Sprites/filip.png"));
+        add(new Sprites(1, 1, 0, 350, 170, 0.7f, "src/Textures/Sprites/Sprite-0002.png"));
     }};
+
+    List<Sprites> spritesListTwo = new ArrayList<Sprites>() {{
+        //pa < 180
+        add(new Sprites(1, 0, 0, 150, 314, 0.5f, "src/Textures/Sprites/OutsideTree.png"));
+        //180 < pa
+        add(new Sprites(1, 0, 0, 350, 170, 0.7f, "src/Textures/Sprites/filip.png"));
+    }};
+    List<Sprites> spritesList;
     //????
     private float px, py, pdx, pdy, pa;
 
@@ -79,9 +152,16 @@ public class Render {
     public void game() {
         buttons();
         drawRays3D();
-        drawSpritesTest();
+        drawSpritesTest(mapNum);
     }
-    void drawSpritesTest() {
+
+    void drawSpritesTest(int mapNum) {
+        if (mapNum == 0) {
+            spritesList = spritesListOne;
+        } else {
+            spritesList = spritesListTwo;
+        }
+
         for (var sprite : spritesList) {
             sprite.renderSprite(px, py, pa, depth);
         }
@@ -133,8 +213,8 @@ public class Render {
                 mx = (int) (rx) >> 6;
                 my = (int) (ry) >> 6;
                 mp = my * mapX + mx;
-                if (mp > 0 && mp < mapX * mapY && mapW[mp] > 0) {
-                    vmt = mapW[mp] - 1;
+                if (mp > 0 && mp < mapX * mapY && mapW[mapNum][mp] > 0) {
+                    vmt = mapW[mapNum][mp] - 1;
                     dof = 8;
                     disV = cos(degToRad(ra)) * (rx - px) - sin(degToRad(ra)) * (ry - py);
                 }//hit
@@ -173,8 +253,8 @@ public class Render {
                 mx = (int) (rx) >> 6;
                 my = (int) (ry) >> 6;
                 mp = my * mapX + mx;
-                if (mp > 0 && mp < mapX * mapY && mapW[mp] > 0) {
-                    hmt = mapW[mp] - 1;
+                if (mp > 0 && mp < mapX * mapY && mapW[mapNum][mp] > 0) {
+                    hmt = mapW[mapNum][mp] - 1;
                     dof = 8;
                     disH = cos(degToRad(ra)) * (rx - px) - sin(degToRad(ra)) * (ry - py);
                 }//hit
@@ -266,6 +346,17 @@ public class Render {
                     green = (int) (Textures.houseDoor[(pixel + 1) % 3072] * shade);
                     blue = (int) (Textures.houseDoor[(pixel + 2) % 3072] * shade);
                 }
+
+                if (hmt == 10){
+                    red = (int) (Textures.OutsideWall[(pixel) % 3072] * shade);
+                    green = (int) (Textures.OutsideWall[(pixel + 1) % 3072] * shade);
+                    blue = (int) (Textures.OutsideWall[(pixel + 2) % 3072] * shade);
+                }
+                if (hmt == 11){
+                    red = (int) (Textures.houseDoor[(pixel) % 3072] * shade);
+                    green = (int) (Textures.houseDoor[(pixel + 1) % 3072] * shade);
+                    blue = (int) (Textures.houseDoor[(pixel + 2) % 3072] * shade);
+                }
                 glPointSize(8);
                 glColor3ub((byte) red, (byte) green, (byte) blue);
                 glBegin(GL_POINTS);
@@ -279,12 +370,23 @@ public class Render {
                 float dy = y - (640 / 2.0f), deg = degToRad(ra), raFix = cos(degToRad(FixAng(pa - ra)));
                 tx = px / 2 + cos(deg) * 158 * 2 * 32 / dy / raFix;
                 ty = py / 2 - sin(deg) * 158 * 2 * 32 / dy / raFix;
-                mp = mapF[(int) (ty / 32.0) * mapX + (int) (tx / 32.0)] * 32 * 32;
+                mp = mapF[mapNum][((int) (ty / 32.0) * mapX + (int) (tx / 32.0))%32] * 32 * 32;
                 int pixel = (((int) (ty) & 31) * 32 + ((int) (tx) & 31)) * 3 + mp * 3;
-
-                red = Textures.houseFloor[(pixel) % 3072];
-                green = Textures.houseFloor[(pixel + 1) % 3072];
-                blue = Textures.houseFloor[(pixel + 2) % 3072];
+                if (mapNum == 0) {
+                    red = Textures.houseFloor[(pixel) % 3072];
+                    green = Textures.houseFloor[(pixel + 1) % 3072];
+                    blue = Textures.houseFloor[(pixel + 2) % 3072];
+                }
+                if (mapNum == 1) {
+                    red = Textures.OutsideGround[(pixel) % 3072];
+                    green = Textures.OutsideGround[(pixel + 1) % 3072];
+                    blue = Textures.OutsideGround[(pixel + 2) % 3072];
+                }
+                if (mapNum == 2) {
+                    red = Textures.SewerFloor[(pixel) % 3072];
+                    green = Textures.SewerFloor[(pixel + 1) % 3072];
+                    blue = Textures.SewerFloor[(pixel + 2) % 3072];
+                }
                 glPointSize(8);
                 glColor3ub((byte) red, (byte) green, (byte) blue);
                 glBegin(GL_POINTS);
@@ -292,11 +394,23 @@ public class Render {
                 glEnd();
 
                 //draw ceiling
-                mp = mapC[(int) (ty / 32.0) * mapX + (int) (tx / 32.0)] * 32 * 32;
+                mp = mapC[mapNum][((int) (ty / 32.0) * mapX + (int) (tx / 32.0))%32] * 32 * 32;
                 pixel = (((int) (ty) & 31) * 32 + ((int) (tx) & 31)) * 3 + mp * 3;
-                red = Textures.houseCeiling[(pixel) % 3072];
-                green = Textures.houseCeiling[(pixel + 1) % 3072];
-                blue = Textures.houseCeiling[(pixel + 2) % 3072];
+                if (mapNum == 0) {
+                    red = Textures.houseCeiling[(pixel) % 3072];
+                    green = Textures.houseCeiling[(pixel + 1) % 3072];
+                    blue = Textures.houseCeiling[(pixel + 2) % 3072];
+                }
+                if (mapNum == 1) {
+                    red = Textures.OutsideSky[(pixel) % 3072];
+                    green = Textures.OutsideSky[(pixel + 1) % 3072];
+                    blue = Textures.OutsideSky[(pixel + 2) % 3072];
+                }
+                if (mapNum == 2) {
+                    red = Textures.SewerCeiling[(pixel) % 3072];
+                    green = Textures.SewerCeiling[(pixel + 1) % 3072];
+                    blue = Textures.SewerCeiling[(pixel + 2) % 3072];
+                }
 
                 glPointSize(8);
                 glColor3ub((byte) (red * 0.7), (byte) (green * 0.7), (byte) (blue * 0.7));
@@ -340,62 +454,33 @@ public class Render {
         int ipy = (int) (py / 64.0f), ipy_add_yo = (int) ((py + yo) / 64.0f), ipy_sub_yo = (int) ((py - yo) / 64.0f);
 
         if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-            if (mapW[ipy * mapX + ipx_add_xo] == 0) {
+            if (mapW[mapNum][ipy * mapX + ipx_add_xo] == 0) {
                 px += 3 * pdx;
             } //Collision detection
-            if (mapW[ipy_add_yo * mapX + ipx] == 0) {
+            if (mapW[mapNum][ipy_add_yo * mapX + ipx] == 0) {
                 py += 3 * pdy;
             } //If map[x] == 1 don't move
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-            if (mapW[ipy * mapX + ipx_sub_xo] == 0) {
+            if (mapW[mapNum][ipy * mapX + ipx_sub_xo] == 0) {
                 px -= 3 * pdx;
             }
-            if (mapW[ipy_sub_yo * mapX + ipx] == 0) {
+            if (mapW[mapNum][ipy_sub_yo * mapX + ipx] == 0) {
                 py -= 3 * pdy;
             }
         }
 
         if (Keyboard.isKeyDown(Keyboard.KEY_E)) { //interact button
-            if (mapW[ipy_add_yo * mapX + ipx_add_xo] == 4) {
-                mapW[ipy_add_yo * mapX + ipx_add_xo] = 0;
+            if (mapW[mapNum][ipy_add_yo * mapX + ipx_add_xo] == 4) {
+                mapW[mapNum][ipy_add_yo * mapX + ipx_add_xo] = 0;
             }
 
-            if (mapW[ipy_add_yo * mapX + ipx_add_xo] == 7) {
-                mapW = new int[]{
-                        2, 2, 7, 2, 2, 5, 2, 2,
-                        6, 0, 0, 0, 0, 0, 0, 2,
-                        2, 0, 0, 0, 0, 0, 0, 3,
-                        2, 0, 0, 0, 0, 2, 4, 2,
-                        2, 0, 0, 0, 0, 0, 0, 2,
-                        3, 0, 0, 0, 0, 0, 0, 3,
-                        2, 0, 0, 0, 0, 0, 0, 2,
-                        2, 2, 2, 3, 6, 2, 2, 2
-                };
-            }
-        }
-    }
+            if (mapW[mapNum][ipy_add_yo * mapX + ipx_add_xo] == 7) {
+                mapNum = 1;
 
-    void drawMap2D() {
-        int y, x, yo, xo;
-        for (y = 0; y < mapY; y++) {
-            for (x = 0; x < mapX; x++) {
-                if (mapW[y * mapX + x] > 0) {
-                    glColor3f(1, 1, 1);
-                } else glColor3f(0, 0, 0);
-                xo = x * mapS;
-                yo = y * mapS;
-                glBegin(GL_QUADS);
-                glVertex2i(xo + 1, yo + 1);
-                glVertex2i(xo + 1, yo + mapS - 1);
-                glVertex2i(xo + mapS - 1, yo + mapS - 1);
-                glVertex2i(xo + mapS - 1, yo + 1);
-                glVertex2i(xo + 1, yo + 1);
-                glVertex2i(xo + 1, yo + mapS - 1);
-                glVertex2i(xo + mapS - 1, yo + mapS - 1);
-                glVertex2i(xo + mapS - 1, yo + 1);
-                glEnd();
+                px = 150;
+                py = 400;
             }
         }
     }

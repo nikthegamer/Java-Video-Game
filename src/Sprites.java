@@ -55,7 +55,7 @@ public class Sprites {
         if (spriteAngle < -180 && spriteX < 0 && spriteY < 0) spriteAngle += 360;
 
         // calculate the sprite's size on the screen
-        float spriteSize = (12 * (float) ((screenWidth / 2) / Math.tan(degToRad(60 / 2))) / spriteDist);
+        float spriteSize = (12 * (float) ((screenWidth / 2) / Math.tan(degToRad(60 / 2))) / spriteDist)+200;
 
         // calculate the top-left corner of the sprite on the screen
         float spriteScreenX = (screenWidth / 2) + spriteAngle * (screenWidth / 60) - (spriteSize / 2);
@@ -63,12 +63,11 @@ public class Sprites {
 
         // draw the sprite as a purple square
         // Enable texturing
-        glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D, this.textureID);
         glEnable(GL_DEPTH_TEST);
         if (sx > 0 && sx < 120 && b < depth[(int) sx]) {
             glBegin(GL_QUADS);
-            System.out.println(spriteAngle);
+            //System.out.println(spriteAngle);
             glColor3f(1.0f, 1.0f, 1.0f);
             glTexCoord2f(0, 0);
             glVertex2f(spriteScreenX, spriteScreenY);

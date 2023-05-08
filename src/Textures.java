@@ -1,18 +1,11 @@
-import org.lwjgl.BufferUtils;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.lwjgl.opengl.GL11.*;
-
 public class Textures {
+
+    //HOUSE
     public static int[] houseWall;
     public static int[] houseDoor;
     public static int[] houseDecoOne;
@@ -22,7 +15,17 @@ public class Textures {
     public static int[] houseCeiling;
     public static int[] Missing_Texture;
 
-    public static int[] WindowTrans;
+    //OUTSIDE
+    public static int[] OutsideGround;
+    public static int[] OutsideSky;
+    public static int[] OutsideWall;
+
+    //SEWER
+
+    public static int[] SewerCeiling;
+    public static int[] SewerFloor;
+    public static int[] SewerWall;
+
 
     int[] readFileTexture(String file) {
         List<Integer> result = new ArrayList<Integer>();
