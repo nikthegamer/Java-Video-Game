@@ -110,17 +110,17 @@ public class Render {
             }
     };
     //---DRAW SPRITES---
-    int state = 1;
     List<Sprites> spritesListOne = new ArrayList<Sprites>() {{
-        add(new Sprites(1, 1, 0, 150, 314, 0.5f, "src/Textures/Sprites/filip.png"));
-        add(new Sprites(1, 1, 0, 350, 170, 0.7f, "src/Textures/Sprites/Sprite-0002.png"));
+        add(new Sprites(1, 1, 0, 150, 314, 0.5f,1000, "src/Textures/Sprites/filip.png"));
+        add(new Sprites(1, 1, 0, 350, 170, 0.7f,2000, "src/Textures/Sprites/Sprite-0002.png"));
+        add(new Sprites(1, 1, 0, 493, 356, 0.7f,1000, "src/Textures/Textures/unknown.png"));
     }};
 
     List<Sprites> spritesListTwo = new ArrayList<Sprites>() {{
         //pa < 180
-        add(new Sprites(1, 0, 0, 150, 314, 0.5f, "src/Textures/Sprites/OutsideTree.png"));
+        add(new Sprites(1, 0, 0, 150, 314, 0.5f,1000, "src/Textures/Sprites/OutsideTree.png"));
         //180 < pa
-        add(new Sprites(1, 0, 0, 350, 170, 0.7f, "src/Textures/Sprites/filip.png"));
+        add(new Sprites(1, 0, 0, 350, 170, 0.7f,1000, "src/Textures/Sprites/filip.png"));
     }};
     List<Sprites> spritesList;
     //????
@@ -153,6 +153,7 @@ public class Render {
         buttons();
         drawRays3D();
         drawSpritesTest(mapNum);
+        //System.out.println(px + " " + py + " " + pa);
     }
 
     void drawSpritesTest(int mapNum) {
@@ -481,6 +482,14 @@ public class Render {
 
                 px = 150;
                 py = 400;
+            }
+
+            if (mapW[mapNum][ipy_add_yo * mapX + ipx_add_xo] == 12) {
+                mapNum = 0;
+
+                px = 170;
+                py = 81;
+                pa = 264;
             }
         }
     }

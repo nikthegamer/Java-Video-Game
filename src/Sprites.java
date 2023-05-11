@@ -6,9 +6,10 @@ public class Sprites {
     int map; // texture
     float posX, posY, spriteZ; // position
     int textureID;
+    int size;
     int screenWidth = 960, screenHeight = 640;
 
-    public Sprites(int type, int state, int map, float x, float y, float z, String filename) {
+    public Sprites(int type, int state, int map, float x, float y, float z, int size,String filename) {
         this.textureID = new ImageTextures(filename).id;
         this.type = type;
         this.state = state;
@@ -16,6 +17,7 @@ public class Sprites {
         this.posX = x;
         this.posY = y;
         this.spriteZ = z;
+        this.size = size;
     }
 
     float bandAid(float angle) {
@@ -55,7 +57,7 @@ public class Sprites {
         if (spriteAngle < -180 && spriteX < 0 && spriteY < 0) spriteAngle += 360;
 
         // calculate the sprite's size on the screen
-        float spriteSize = (12 * (float) ((screenWidth / 2) / Math.tan(degToRad(60 / 2))) / spriteDist)+200;
+        float spriteSize = (12 * (float) ((screenWidth + this.size  / 2) / Math.tan(degToRad(60 / 2))) / spriteDist);
 
         // calculate the top-left corner of the sprite on the screen
         float spriteScreenX = (screenWidth / 2) + spriteAngle * (screenWidth / 60) - (spriteSize / 2);

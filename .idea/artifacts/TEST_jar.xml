@@ -1,0 +1,12 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="TEST:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/TEST_jar</output-path>
+    <root id="archive" name="TEST.jar">
+      <element id="module-output" name="TEST" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jars/lwjgl.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jars/lwjgl_util.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/lib/jars/slick-util.jar" path-in-jar="/" />
+      <element id="library" level="project" name="lib" />
+    </root>
+  </artifact>
+</component>
